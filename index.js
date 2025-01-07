@@ -7,7 +7,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const thingsboardUrl =
-  "https://thingsboard.example.com/api/v1/g3xib6DDxR2agTN6TYua/telemetry";
+  "http://demo.thingsboard.io/api/v1/g3xib6DDxR2agTN6TYua/telemetry";
 
 app.get("/send-telemetry", async (req, res) => {
   //   const telemetryData = "";
