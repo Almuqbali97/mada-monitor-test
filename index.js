@@ -51,6 +51,52 @@ app.get("/send-telemetry", async (req, res) => {
   }
 });
 
+
+
+// Function to send telemetry
+async function sendTelemetry() {
+    try {
+      const cpuLoad = await getZabbixData(
+        "zabbix_get -s 127.0.0.1 -p 10050 -k proc.cpu.util"
+      );
+      const memory = await getZabbixData(
+        "zabbix_get -s 127.0.0.1 -p 10050 -k vm.memory.size[pused]" // Memory usage in percentage
+      );
+      const storage = await getZabbixData(
+        "zabbix_get -s 127.0.0.1 -p 10050 -k vfs.fs.size[/,pused]" // Storage usage of root filesystem in percentage
+      );
+      const sqlService = await getZabbixData(
+        "zabbix_get -s 127.0.0.1 -p 10050 -k proc.cpu.util[,mysql]"
+      );
+  
+      const telemetryData = {
+        cpuLoad: cpuLoad,
+        memory: memory,
+        storage: storage,
+        SQL_Service: sqlService,
+      };
+  
+      const response = await fetch(thingsboardUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(telemetryData),
+      });
+  
+      if (response.ok) {
+        console.log("Telemetry sent successfully:", telemetryData);
+      } else {
+        console.error("Failed to send telemetry:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error sending telemetry:", error.message);
+    }
+  }
+  
+  // Trigger telemetry every 3 seconds
+  setInterval(sendTelemetry, 3000);
+  
 // Function to get data from Zabbix agent
 function getZabbixData(command) {
   return new Promise((resolve, reject) => {
