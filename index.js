@@ -16,13 +16,27 @@ app.get("/send-telemetry", async (req, res) => {
     const cpuLoad = await getZabbixData(
       "zabbix_get -s 127.0.0.1 -p 10050 -k proc.cpu.util"
     );
+    const memory = await getZabbixData(
+      "zabbix_get -s 127.0.0.1 -p 10050 -k vm.memory.size[pused]" // Memory usage in percentage
+    );
+    const storage = await getZabbixData(
+      "zabbix_get -s 127.0.0.1 -p 10050 -k vfs.fs.size[/,pused]" // Storage usage of root filesystem in percentage
+    );
+    const sqlService = await getZabbixData(
+      "zabbix_get -s 127.0.0.1 -p 10050 -k proc.cpu.util[,mysql]"
+    );
     console.log(cpuLoad);
     const response = await fetch(thingsboardUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ cpuLoad: cpuLoad }),
+      body: JSON.stringify({
+        cpuLoad: cpuLoad,
+        memory: memory,
+        storage: storage,
+        SQL_ervice: sqlService,
+      }),
     });
 
     if (response.ok) {
