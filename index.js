@@ -16,6 +16,7 @@ app.get("/send-telemetry", async (req, res) => {
     const cpuLoad = await getZabbixData(
       "zabbix_get -s 127.0.0.1 -p 10050 -k proc.cpu.util"
     );
+    console.log(cpuLoad);
     const response = await fetch(thingsboardUrl, {
       method: "POST",
       headers: {
